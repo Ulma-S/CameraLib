@@ -11,11 +11,11 @@ public struct Unit : System.IEquatable<Unit>
 }
 
 
-public class SafeEvent<T, TArg> where TArg : SafeEventArg
+public class SafeEvent<T, TArg> where TArg : ISafeEventArg
 {
     public delegate T SafeFunc(TArg arg);
 
-    private readonly Dictionary<SafeEventHandler<T, TArg>, SafeFunc> _CallbackMap = new Dictionary<SafeEventHandler<T, TArg>, SafeFunc>();
+    private readonly Dictionary<SafeEventHandler<T, TArg>, SafeFunc> _CallbackMap = new ();
 
     public SafeEvent()
     {
@@ -23,7 +23,7 @@ public class SafeEvent<T, TArg> where TArg : SafeEventArg
     }
 
 
-    public SafeEventHandler<T, TArg> Register(SafeFunc eventCallback)
+    public SafeEventHandler<T, TArg> Register(in SafeFunc eventCallback)
     {
         var handler = new SafeEventHandler<T, TArg>(this);
         _CallbackMap.Add(handler, eventCallback);
@@ -41,7 +41,7 @@ public class SafeEvent<T, TArg> where TArg : SafeEventArg
     }
 
 
-    public void Execute(TArg arg)
+    public void Execute(TArg arg = default)
     {
         foreach (var method in _CallbackMap.Values)
         {
@@ -51,7 +51,7 @@ public class SafeEvent<T, TArg> where TArg : SafeEventArg
 }
 
 
-public class SafeEventHandler<T, TArg> where TArg : SafeEventArg
+public class SafeEventHandler<T, TArg> where TArg : ISafeEventArg
 {
     private readonly SafeEvent<T, TArg> _Event;
 
@@ -72,10 +72,6 @@ public class SafeEventHandler<T, TArg> where TArg : SafeEventArg
 }
 
 
-public class SafeEventArg
+public interface ISafeEventArg
 {
-    public static T CreateArg<T>() where T : SafeEventArg, new()
-    {
-        return new T();
-    }
 }
