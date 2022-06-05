@@ -41,11 +41,11 @@ public class SafeEvent<T, TArg> where TArg : SafeEventArg
     }
 
 
-    public void Execute(params object[] args)
+    public void Execute(TArg arg)
     {
         foreach (var method in _CallbackMap.Values)
         {
-            method?.DynamicInvoke();
+            method?.DynamicInvoke(arg);
         }
     }
 }
